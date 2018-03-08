@@ -43,7 +43,6 @@ def trans():
         "salt":salt,
         "sign":sign
     }
-    print(params)
     resp = requests.get(url,params=params)
     return jsonify(resp.json())
 
@@ -54,7 +53,7 @@ def save():
     filename = str(int(time.time()))+".html"
 
     with open("./templates/"+filename,"w",encoding="utf-8") as f:
-        f.write('<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>在线md文档</title><link rel="stylesheet" href="/static/style.css"><link rel="stylesheet" href="/static/preview.css"></head><body>')
+        f.write('<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>在线md文档</title><link rel="stylesheet" href="/static/style.css"><link rel="stylesheet" href="/static/preview.css"><style type="text/css">body{padding-top:2%;padding-left:20%;padding-right:20%;padding-bottom:2%;}</style></head><body>')
         f.write(html)
         f.write('</body></html>')
 

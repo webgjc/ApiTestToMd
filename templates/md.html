@@ -35,7 +35,8 @@
             border: none;
             outline: none;
             resize: none;
-            padding: 0;
+            padding-top: 20px;
+            padding-left: 10px;
         }
         .btn{
             display: inline-block;
@@ -109,12 +110,20 @@
                     async: false
                 })
                 .done(function(data) {
-                    trans_res = data['trans_result'][0]['dst']
+                    console.log(data)
+                    if(data['error_code']==undefined){
+                        trans_res = data['trans_result'][0]['dst'];
+                        trans_res = trans_res.split("=");
+                    }else{
+                        trans_res = []
+                        for(let i=0;i<trans_q.replace(/[^=]/g,'').length+1;i++){
+                            trans_res.push("-")
+                        }
+                    }
                 })
                 .fail(function() {
                     console.log("error");
                 });
-                trans_res = trans_res.split("=");
                 return trans_res;
             }
 
@@ -191,6 +200,9 @@
             if(sessionStorage.history!=undefined){
                 his_data = JSON.parse(sessionStorage.history)
                 for(let i=0;i<his_data.length;i++){
+                    if(i==0){
+                        api_info += "# xxx 接口文档\n\n"
+                    }
                     part = his_data[i].url.split("&");
                     url = part[0].substr(9);
                     method = part[1].substr(7);

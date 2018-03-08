@@ -82,7 +82,7 @@
                 window.location.reload();
             });
 
-            $(".del_his").click(function(){
+            $(".history").delegate('.del_his', 'click', function(event) {
                 id = parseInt(this.id.substr(3));
                 his_data.splice(id,1);
                 sessionStorage.history = JSON.stringify(his_data);
