@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>接口测试</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style type="text/css">
+        .result{
+            margin-top: 2%;
+            width: 50%;
+            float: left;
+        }
+        .history{
+            margin-top: 2%;
+            width: 50%;
+            float: right;
+            word-break: break-all;
+        }
+        .card{
+            margin-top: 1%;
+            width: 100% !important;
+        }
+        .del_his{
+            float: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form action="">
+            <div class="form-group">
+                <label for="url">api地址</label>
+                <input type="text" class="form-control" id="url" placeholder="api url" value="">
+            </div>
+            <div class="form-group">
+                <label for="query">参数</label>
+                <textarea class="form-control" name="" id="query" placeholder="如a=1&#10;b=2"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="method">方法</label>
+                <select class="form-control" id="method">
+                    <option value="get">get</option>
+                    <option value="post">post</option>
+                    <option value="put">put</option>
+                    <option value="delete">delete</option>
+                </select>
+            </div>
+            <button type="button" class="btn btn-outline-primary btn-lg btn-block" id="sub">提交</button>
+        </form>
+        <div id="result" class="result"></div>
+        <div class="history">
+            <a href="/md"><button class="btn btn-outline-dark">合成文档</button></a>
+            <button class="btn btn-outline-dark" id="qk">清空历史</button>
+        </div>
+        
+    </div>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            //sessionStorage.clear()
+
+            if(typeof(sessionStorage.history)=="undefined"){
+                var his_data=[]
+            }else{
+                var his_data=JSON.parse(sessionStorage.history);
+                len_history = his_data.length
+                for(let i=0;i<his_data.length;i++){
+                    part = his_data[i].url.split("&");
+                    url = part[0].substr(9);
+                    method = part[1].substr(7);
+                    query = his_data[i].query
+                    str = '<div class="card" style="width: 18rem;"><div class="card-body"><button class="btn btn-outline-dark del_his" id="his'+i+'">删除</button><div><b>'+method+'</b> '+url+'</div><div>'+query+'</div></div></div>'
+                    $(".history").append(str);
+                }
+            }
+
+            $("#qk").click(function(){
+                sessionStorage.clear();
+                window.location.reload();
+            });
+
+            $(".del_his").click(function(){
+                id = parseInt(this.id.substr(3));
+                his_data.splice(id,1);
+                sessionStorage.history = JSON.stringify(his_data);
+                window.location.reload();
+            });
+
+            $("#sub").click(function(){
+                url = "/api?url="+$("#url").val()+"&method="+$("#method").val();
+                query_str = $("#query").val();
+                query_str = query_str.replace(/[\r\n]/g,"&");
+                /*$.post(url, query_str, function(data, textStatus, xhr) {
+                    console.log(textStatus)
+                    try{
+                        console.log(data)
+                        if(data['sts']=="0"){
+                            data = data['msg'];
+                            $("#result").html("<pre>"+JSON.stringify(data, null, 4)+"</pre>");
+                            his_data.push({"url":url,"query":query_str});
+                            sessionStorage.history = JSON.stringify(his_data);
+                        }
+                    }catch(err){
+                        $("#result").html("返回不是json哦"+"<br />"+data);
+                    }
+                })*/
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    dataType: "json",
+                    data: query_str,
+                })
+                .done(function(data) {
+                    try{
+                        if(data['sts']=="0"){
+                            $("#result").html("<div>时间："+data['time']+" (毫秒)</div>"+"<pre>"+JSON.stringify(JSON.parse(data['msg']), null, 4)+"</pre>");
+                            his_data.push({"url":url,"query":query_str,"res":data['msg']});
+                            sessionStorage.history = JSON.stringify(his_data);
+                            $(".card").remove();
+                            for(let i=0;i<his_data.length;i++){
+                                part = his_data[i].url.split("&");
+                                url = part[0].substr(9);
+                                method = part[1].substr(7);
+                                query = his_data[i].query
+                                str = '<div class="card" style="width: 18rem;"><div class="card-body"><button class="btn btn-outline-dark del_his" id="his'+i+'">删除</button><div><b>'+method+'</b> '+url+'</div><div>'+query+'</div></div></div>'
+                                $(".history").append(str);
+                            }
+                            /*str = '<div class="card" style="width: 18rem;"><div class="card-body"><button class="btn btn-outline-dark del_his" id="his'+len_history+'">删除</button><div><b>'+$("#method").val()+'</b> '+$("#url").val()+'</div><div>'+query_str+'</div></div></div>';
+                            $(".history").append(str);
+                            len_history++;*/
+                        }
+                    }catch(err){
+                        $("#result").html("返回不是json哦"+"<br />"+data['msg']);
+                    }
+                })
+                .fail(function(data) {
+                    $("#result").html("状态码"+data.status+"<br>"+data.responseText);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

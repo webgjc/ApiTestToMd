@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>在线md文档</title>
+    <!--<link href="http://kevinburke.bitbucket.org/markdowncss/markdown.css" rel="stylesheet">
+    <link rel="stylesheet" href="http://123.206.217.190:5000/static/markdown.css">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css">-->
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/preview.css">
+    <style type="text/css">
+        html,body,.row{
+            height: 99%;
+        }
+        .col-l{
+            float: left;
+            width: 50%;
+            height: 94%;
+        }
+        .col-r{
+            float: right;
+            width: 50%;
+            padding: 20px;
+            height: 94%;
+            overflow: scroll;
+        }
+        .text{
+            width: 100%;
+            height: 100%;
+            font-family: courier;
+            background-color: #042029;
+            color: #819090;
+            font-size: 12pt;
+            line-height: 20px;
+            border: none;
+            outline: none;
+            resize: none;
+            padding: 0;
+        }
+        .btn{
+            display: inline-block;
+            padding: 6px 12px;
+            margin-bottom: 0;
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.42857143;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            -ms-touch-action: manipulation;
+            touch-action: manipulation;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            background-image: none;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            color: #333;
+            background-color: #fff;
+            border-color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="row">
+        <div class="col-l">
+            <textarea id="md" class="text"  placeholder="请输入Markdown代码"></textarea>
+        </div>
+        <div id="html" class="col-r"></div>
+        <div>
+            <button id="save" class="btn">保存文档</button>
+        </div>
+    </div>
+    <!--<script src="https://cdn.bootcss.com/showdown/1.8.6/showdown.js"></script>-->
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/marked/0.3.17/marked.min.js"></script>
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.12.0/build/highlight.min.js"></script>
+    <script src="/static/md5.js"></script>
+    <script type="text/javascript">
+        /*showdown.setFlavor("github");
+        var conver = new showdown.Converter();
+        $("#md").on("keyup blur",function () {
+            $('#html').html(conver.makeHtml($("#md").val()))
+        });*/
+        $(document).ready(function() {
+
+            $('#md').each(function(i, block) {
+                hljs.highlightBlock(block);
+            });
+
+            function checkType(input){
+                if (isNaN(input)) {
+                    return "string"
+                }else if (!/^-?\d+$/.test(input)) {
+                    return "float"
+                }else{
+                    return "int"
+                }
+            }
+
+            function translate(trans_q){
+                var trans_res;
+                $.ajax({
+                    url: '/translate?q='+trans_q,
+                    type: 'GET',
+                    dataType: 'json',
+                    async: false
+                })
+                .done(function(data) {
+                    trans_res = data['trans_result'][0]['dst']
+                })
+                .fail(function() {
+                    console.log("error");
+                });
+                trans_res = trans_res.split("=");
+                return trans_res;
+            }
+
+            function tran_api_md(url,method,req,res){
+                var all_req = req.split("&");
+                var query = "";
+                var trans_q = "";
+                var tmpkv = []
+                for(let i=0;i<all_req.length;i++){
+                    [k,v] = all_req[i].split("=");
+                    trans_q+=k+"="
+                    tmpkv.push([k,v])
+                }
+                trans_res = translate(trans_q)
+                for(let i=0;i<tmpkv.length;i++){
+                    query+="|"+tmpkv[i][0]+"|"+trans_res.shift()+"|"+checkType(tmpkv[i][1])+"|Y|-|\n";
+                }
+                var res_query = "";
+                result = JSON.parse(res);
+                trans_q = ""
+                if(result.length == undefined){
+                    trans_q = Object.keys(result).join("=")
+                }else{
+                    trans_q = Object.keys(result[0]).join("=")
+                }
+                trans_res = translate(trans_q)
+                if(result.length == undefined){
+                    for(let i in result){
+                        res_query += "|"+i+"|"+trans_res.shift()+"|"+checkType(result[i])+"|-|\n"
+                    }
+                }else{
+                    for(let i in result[0]){
+                        res_query += "|"+i+"|"+trans_res.shift()+"|"+checkType(result[0][i])+"|-|\n"
+                    }
+                }
+                var format=''
+                    format+='## 接口名称:\n'
+                    format+='\n'
+                    format+='### 1) 请求地址\n'
+                    format+='\n'
+                    format+='>'+url+'\n'
+                    format+='\n'
+                    format+='### 2) 调用方式：HTTP '+method.toUpperCase()+'\n'
+                    format+='\n'
+                    format+='### 3) 接口描述：\n'
+                    format+='\n'
+                    format+='### 4) 请求参数:\n'
+                    format+='\n'
+                    format+='| 字段名称 | 字段说明 | 类型 | 必填 | 备注 |\n'
+                    format+='| ------|:------:|:-------:|:------:| ------:|\n'
+                    format+=''+query+''
+                    format+='\n'
+                    format+='### 5) 请求返回结果:\n'
+                    format+='```\n'
+                    format+=''+JSON.stringify(JSON.parse(res), null, 4)+''
+                    format+='\n'
+                    format+='```\n'
+                    format+='\n'
+                    format+='### 6) 请求返回结果参数说明:\n'
+                    format+='| 字段名称 | 字段说明 | 类型 | 备注 |\n'
+                    format+='| ------|:------:|:------:| ------:|\n'
+                    format+=res_query+"\n";
+                return format;
+            }
+
+            function init(api_info){
+                sessionStorage.md = api_info;
+                $("#md").text(sessionStorage.md);
+                $("#html").html(marked($("#md").val()));
+                //areaRows = $("#md").val().split("\n").length;
+            }
+
+            var api_info = ""
+            if(sessionStorage.history!=undefined){
+                his_data = JSON.parse(sessionStorage.history)
+                for(let i=0;i<his_data.length;i++){
+                    part = his_data[i].url.split("&");
+                    url = part[0].substr(9);
+                    method = part[1].substr(7);
+                    api_info += tran_api_md(url,method,his_data[i].query,his_data[i].res)
+                }
+            }
+            
+
+            var scroll_main = 0;
+
+            init(api_info);
+
+            var bfb = ($("#md")[0].scrollHeight-$("#md")[0].clientHeight)/($("#html")[0].scrollHeight-$("#html")[0].clientHeight);
+
+            $("body").mouseover(function(e){
+                if(e.clientX/$(window).width()<=0.5){
+                    scroll_main=0
+
+                }else{
+                    scroll_main=1
+                }
+            });                    
+
+            $("#md").scroll(function(e){
+                if(scroll_main==0){
+                    $("#html").scrollTop($("#md").scrollTop() / bfb);
+                }
+            });
+
+            $("#html").scroll(function(e){
+                if(scroll_main==1){
+                    $("#md").scrollTop($("#html").scrollTop() * bfb);
+                }
+            });
+
+            $("#md").on("keyup blur",function () {
+                $('#html').html(marked($("#md").val()));
+                sessionStorage.md = $("#md").val();
+            });
+
+            $("#save").click(function(){
+                $.post('/save', {html: marked($("#md").val())}, function(data, textStatus, xhr) {
+                    window.location.href=data['url']
+                });
+            });
+
+        });
+        
+    </script>
+</body>
+</html>
