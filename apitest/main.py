@@ -3,6 +3,7 @@ import requests
 import hashlib
 import random
 import time
+import os
 
 api = Blueprint("api",__name__)
 req = requests.Session()
@@ -19,7 +20,7 @@ def apiget():
         res = req.put(query['url'],data=body,timeout=3)
     elif query['method'] == "delete":
         res = req.delete(query['url'],data=body,timeout=3)
-    return jsonify({"sts":"0","msg":res.text,"time":res.elapsed.microseconds/1000})
+    return jsonify({"sts":0,"msg":res.text,"time":res.elapsed.microseconds/1000})
 
 @api.route("/translate",methods=["GET"])
 def trans():
@@ -49,12 +50,35 @@ def trans():
 @api.route("/save",methods=["POST"])
 def save():
     html = request.form.get("html")
+    md = request.form.get("md")
+    filename = request.form.get("filename")
 
-    filename = str(int(time.time()))+".html"
+    if len(filename)<3:
+        filename = str(int(time.time()))
 
-    with open("./templates/"+filename,"w",encoding="utf-8") as f:
+    htmlfile = filename+".html"
+    mdfile = filename+".md"
+
+    with open("./templates/"+htmlfile,"w",encoding="utf-8") as f:
         f.write('<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>在线md文档</title><link rel="stylesheet" href="/static/style.css"><link rel="stylesheet" href="/static/preview.css"><style type="text/css">body{padding-top:2%;padding-left:20%;padding-right:20%;padding-bottom:2%;}</style></head><body>')
         f.write(html)
         f.write('</body></html>')
+        f.close()
 
-    return jsonify({"sts":0,"url":"/html/"+filename})
+    with open("./md/"+mdfile, "w") as f:
+        f.write(md)
+        f.close()
+
+    return jsonify({"sts":0,"url":"/html/"+htmlfile})
+
+@api.route("/load",methods=["GET"])
+def load():
+    md = request.args.get("md")
+    mdStr = open("./md/"+md).read()
+    return jsonify({"sts":0,"msg":mdStr})
+
+
+@api.route("/get_md_list",methods=["GET"])
+def get_md_list():
+    md_list = os.listdir("./md/")
+    return jsonify({"sts":0,"msg":md_list})

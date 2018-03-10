@@ -39,28 +39,43 @@
             padding-left: 10px;
         }
         .btn{
-            display: inline-block;
             padding: 6px 12px;
             margin-bottom: 0;
             font-size: 14px;
             font-weight: 400;
             line-height: 1.42857143;
             text-align: center;
-            white-space: nowrap;
-            vertical-align: middle;
-            -ms-touch-action: manipulation;
-            touch-action: manipulation;
-            cursor: pointer;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            background-image: none;
             border: 1px solid transparent;
+            margin-left: 3px;
+            margin-top: 3px;
             border-radius: 4px;
-            color: #333;
+            color: #000;
             background-color: #fff;
-            border-color: #ccc;
+            border-color: #000;
+        }
+        .dropdown-menu{
+            border:solid #D8D8D8 1px;
+            position: absolute;
+            bottom: 9%;
+            float: left;
+            min-width: 160px;
+            padding: 5px 0;
+            margin: 2px 0 0;
+            font-size: 14px;
+            text-align: left;
+            list-style: none;
+            background: #fff;
+            display: none;
+        }
+        .dropdown-menu a{
+            text-decoration:none;
+            display: block;
+            font-weight: 400;
+            padding: 10px;
+            font-size: 14px;
+            color: black;
+            font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+            padding-left: 20px;
         }
     </style>
 </head>
@@ -71,6 +86,8 @@
         </div>
         <div id="html" class="col-r"></div>
         <div>
+            <button type="button" class="btn" id="load">加载文档</button>
+            <ul class="dropdown-menu" role="menu" id="mdlist"> </ul>
             <button id="save" class="btn">保存文档</button>
         </div>
     </div>
@@ -90,6 +107,8 @@
             $('#md').each(function(i, block) {
                 hljs.highlightBlock(block);
             });
+
+            //sessionStorage.clear();
 
             function checkType(input){
                 if (isNaN(input)) {
@@ -213,9 +232,17 @@
 
             var scroll_main = 0;
 
+            var bfb = 0;
+
+            var FILE = sessionStorage.file;
+
             init(api_info);
 
-            var bfb = ($("#md")[0].scrollHeight-$("#md")[0].clientHeight)/($("#html")[0].scrollHeight-$("#html")[0].clientHeight);
+            function reload_bfb(){
+                bfb = ($("#md")[0].scrollHeight-$("#md")[0].clientHeight)/($("#html")[0].scrollHeight-$("#html")[0].clientHeight);
+            }
+
+            reload_bfb();
 
             $("body").mouseover(function(e){
                 if(e.clientX/$(window).width()<=0.5){
@@ -240,17 +267,45 @@
 
             $("#md").on("keyup blur",function () {
                 $('#html').html(marked($("#md").val()));
+                reload_bfb();
                 sessionStorage.md = $("#md").val();
             });
 
             $("#save").click(function(){
-                $.post('/save', {html: marked($("#md").val())}, function(data, textStatus, xhr) {
+                if(sessionStorage.file==""){
+                    var filename = prompt("请输入文件名,如xxx.md")
+                }else{
+                    var filename = sessionStorage.file;
+                }
+                $.post('/save', {html:marked($("#md").val()),md:$("#md").val(),filename:filename}, function(data, textStatus, xhr) {
                     window.location.href=data['url']
                 });
             });
 
+            $("#mdlist").delegate('li', 'click', function(event) {
+                sessionStorage.file = this.id.substr(0,this.id.length-3)
+                $.get('/load?md='+this.id, function(data) {
+                    $("#md").val(data['msg']);
+                    $('#html').html(marked($("#md").val()));
+                    reload_bfb();
+                    sessionStorage.md = $("#md").val();
+                });
+                $(this).parent().toggle();
+            });
+
+            $("#load").click(function(){
+                $("#mdlist").toggle();
+                $.get('/get_md_list', function(data) {
+                    str="";
+                    for(let i=0;i<data['msg'].length;i++){
+                        //str+="<option value='"+data['msg'][i]+"'>"+data['msg'][i]+"</option>"
+                        str+="<li id='"+data['msg'][i]+"'><a href='#''>"+data['msg'][i]+"</a></li>"
+                    }
+                    $("#mdlist").html(str)
+                });
+            });
+
         });
-        
     </script>
 </body>
 </html>
