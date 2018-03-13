@@ -209,7 +209,9 @@
             }
 
             function init(api_info){
-                sessionStorage.md = api_info;
+                if(api_info!=""){
+                    sessionStorage.md = api_info;
+                }
                 $("#md").text(sessionStorage.md);
                 $("#html").html(marked($("#md").val()));
                 //areaRows = $("#md").val().split("\n").length;
@@ -235,7 +237,7 @@
             var bfb = 0;
 
             var FILE = sessionStorage.file;
-
+            
             init(api_info);
 
             function reload_bfb(){
