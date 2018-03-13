@@ -67,13 +67,18 @@
             }else{
                 var his_data=JSON.parse(sessionStorage.history);
                 len_history = his_data.length
-                for(let i=0;i<his_data.length;i++){
+                for(let i=0;i<len_history;i++){
                     part = his_data[i].url.split("&");
                     url = part[0].substr(9);
                     method = part[1].substr(7);
                     query = his_data[i].query
                     str = '<div class="card" style="width: 18rem;"><div class="card-body"><button class="btn btn-outline-dark del_his" id="his'+i+'">删除</button><div><b>'+method+'</b> '+url+'</div><div>'+query+'</div></div></div>'
                     $(".history").append(str);
+                    if(i==len_history-1){
+                        $("#url").val(url);
+                        $("#query").val(query.replace(/&/g,"\n"));
+                        $("#method").val(method);
+                    }
                 }
             }
 
