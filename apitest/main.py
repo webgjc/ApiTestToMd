@@ -65,7 +65,7 @@ def save():
         f.write('</body></html>')
         f.close()
 
-    with open("./md/"+mdfile, "w") as f:
+    with open("./md/"+mdfile, "w", encoding="utf-8") as f:
         f.write(md)
         f.close()
 
