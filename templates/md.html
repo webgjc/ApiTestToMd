@@ -89,6 +89,7 @@
             <button type="button" class="btn" id="load">加载文档</button>
             <ul class="dropdown-menu" role="menu" id="mdlist"> </ul>
             <button id="save" class="btn">保存文档</button>
+            <button id="new" class="btn">新建文档</button>
         </div>
     </div>
     <!--<script src="https://cdn.bootcss.com/showdown/1.8.6/showdown.js"></script>-->
@@ -275,13 +276,20 @@
 
             $("#save").click(function(){
                 if(!sessionStorage.file){
-                    var filename = prompt("请输入文件名,如xxx.md")
+                    var filename = prompt("请输入文件名,如xxx.md");
+                    console.log(filename)
                 }else{
                     var filename = sessionStorage.file;
                 }
                 $.post('/save', {html:marked($("#md").val()),md:$("#md").val(),filename:filename}, function(data, textStatus, xhr) {
                     window.location.href=data['url']
                 });
+            });
+
+            $("#new").click(function(){
+                sessionStorage.file="";
+                sessionStorage.md="";
+                window.location.reload();
             });
 
             $("#mdlist").delegate('li', 'click', function(event) {
