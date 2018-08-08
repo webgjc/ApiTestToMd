@@ -1,0 +1,34 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>在线md文档</title><link rel="stylesheet" href="/static/style.css"><link rel="stylesheet" href="/static/preview.css"><style type="text/css">body{padding-top:2%;padding-left:20%;padding-right:20%;padding-bottom:2%;}</style></head><body><h1 id="virtualenv-">virtualenv使用</h1>
+<h2 id="-python-">用于为项目创建虚拟环境，一般用于python项目，方便迁移与项目版本管理。</h2>
+<hr>
+<h2 id="-">安装</h2>
+<blockquote>
+<p>pip install virtualenv</p>
+</blockquote>
+<h2 id="-">创建环境</h2>
+<blockquote>
+<p>virtualenv env</p>
+</blockquote>
+<ul>
+<li><h3 id="-">可加参数</h3>
+</li>
+<li><h3 id="-">增加系统库</h3>
+<blockquote>
+<p>virtualenv --system-site-packages env</p>
+</blockquote>
+</li>
+<li><h3 id="-">自己提供路径</h3>
+<blockquote>
+<p>virtualenv ----extra-search-dir=/path/path env</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="-">载入环境</h2>
+<blockquote>
+<p>source ./env/bin/activate</p>
+</blockquote>
+<h2 id="-">载出环境</h2>
+<blockquote>
+<p>deactivate</p>
+</blockquote>
+</body></html>

@@ -277,6 +277,7 @@
             $("#save").click(function(){
                 if(!sessionStorage.file){
                     var filename = prompt("请输入文件名,如xxx.md");
+                    sessionStorage.file=filename;
                     console.log(filename)
                 }else{
                     var filename = sessionStorage.file;

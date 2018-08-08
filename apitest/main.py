@@ -1,3 +1,4 @@
+#coding:utf-8
 from flask import Blueprint,request,jsonify
 import requests
 import hashlib
@@ -74,7 +75,7 @@ def save():
 @api.route("/load",methods=["GET"])
 def load():
     md = request.args.get("md")
-    mdStr = open("./md/"+md).read()
+    mdStr = open("./md/"+md,encoding="utf-8").read()
     return jsonify({"sts":0,"msg":mdStr})
 
 

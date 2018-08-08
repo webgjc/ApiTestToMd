@@ -1,0 +1,74 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>在线md文档</title><link rel="stylesheet" href="/static/style.css"><link rel="stylesheet" href="/static/preview.css"><style type="text/css">body{padding-top:2%;padding-left:20%;padding-right:20%;padding-bottom:2%;}</style></head><body><h1 id="-">虚拟机管理</h1>
+<h2 id="-">下载所需库环境</h2>
+<blockquote>
+<p>yum -y install qemu-kvm qemu-key-tools virt-manager libvirt virt-install python-virtinst bridge-utils<br>yum -y install kvm qemu libvirt virt-viewer qemu-system<br>yum -y install libguestfs-tools</p>
+</blockquote>
+<h2 id="-img-">创建虚拟img镜像</h2>
+<blockquote>
+<p>qemu-img create -f qcow2 /home/vm/name.img 100G</p>
+</blockquote>
+<h2 id="-">配置虚拟机</h2>
+<p>参数分别为：虚拟机名称，cpu，内存，iso镜像路径，img镜像路径，vnc端口  </p>
+<blockquote>
+<p>virt-install \<br>--name name \<br>--vcpus=2 \<br>--ram 2048 \<br>--cdrom=/home/CentOS-7-x86_64-DVD-1511.iso –disk \<br>path=/home/qianhangjian/CentOS7_DVD1511.img \<br>--graphics vnc,listen=0.0.0.0,port=5910</p>
+</blockquote>
+<h2 id="-tightvnc-ip-centos-">然后打开tightvnc 连接对应的ip和端口，进行centos图形化安装。</h2>
+<h3 id="-centos-pdf-">安装参考centos安装pdf文件</h3>
+<h2 id="-">中间需配置的文件：</h2>
+<blockquote>
+<p>网卡文件<br>/etc/sysconfig/network-scripts/ifcfg-eth0<br>虚拟机配置文件<br>/etc/libvirt/qemu/xxx.xml</p>
+</blockquote>
+<h2 id="-">虚拟机和实体机之间的网络用桥连</h2>
+<h3 id="-">具体配置大致为,以下做参考</h3>
+<blockquote>
+<p>TYPE=&quot;Ethernet&quot;<br>DEFROUTE=&quot;yes&quot;<br>IPV4_FAILURE_FATAL=&quot;no&quot;<br>IPV6INIT=&quot;no&quot;<br>NAME=&quot;eno1&quot;<br>DEVICE=&quot;eno1&quot;<br>ONBOOT=&quot;yes&quot;<br>BRIDGE=&quot;br0&quot;  </p>
+</blockquote>
+<blockquote>
+<p>TYPE=&quot;Bridge&quot;<br>BOOTPROTO=&quot;static&quot;<br>NAME=&quot;br0&quot;<br>DEVICE=&quot;br0&quot;<br>ONBOOT=&quot;yes&quot;<br>IPADDR=&quot;192.168.6.10&quot;<br>NETMASK=&quot;255.255.255.0&quot;<br>GATEWAY=&quot;192.168.6.1&quot;<br>DNS1=&quot;192.168.6.1&quot;  </p>
+</blockquote>
+<h2 id="-">日常维护命令</h2>
+<h3 id="-all-">列出运行中虚拟机 (--all 为列出所有)</h3>
+<blockquote>
+<p>virsh list</p>
+</blockquote>
+<h3 id="-">开启，关闭虚拟机</h3>
+<blockquote>
+<p>virsh start name<br>virsh shutdown name/num<br>virsh destroy name/num</p>
+</blockquote>
+<h3 id="-">删除虚拟机 (删除前需先关闭)</h3>
+<blockquote>
+<p>virsh undefine name</p>
+</blockquote>
+<h3 id="-">创建虚拟机快照</h3>
+<blockquote>
+<p>virsh snapshot-create-as name snapid<br>virsh snapshot-create name</p>
+</blockquote>
+<h3 id="-">列出虚拟机快照</h3>
+<blockquote>
+<p>virsh snapshot-list name/num</p>
+</blockquote>
+<h3 id="-force-">回退虚拟机到快照 (--force 强制回退)</h3>
+<blockquote>
+<p>virsh snapshot-revert name/num snapid</p>
+</blockquote>
+<ul>
+<li><h3 id="-">回退之后要校准时间</h3>
+<blockquote>
+<p>ntpdate -u ntp.sjtu.edu.cn<br>hwclock -w</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="-">删除虚拟机快照</h3>
+<blockquote>
+<p>virsh snapshot-delete name/num snapid</p>
+</blockquote>
+<h3 id="-">克隆虚拟机</h3>
+<blockquote>
+<p>virt-clone -o 克隆虚拟机名称 -n 目标虚拟机名称 -f 路径/name.img</p>
+</blockquote>
+<h3 id="-">克隆虚拟机全自动脚本</h3>
+<blockquote>
+<p>name=clone1<br>port=5901<br>ip=192.168.199.63<br>dir=/home/vm/<br>virsh destroy base<br>rm -rf $dir$name.img<br>virt-clone -o base -n $name -f $dir$name.img<br>virt-copy-out -d $name /etc/sysconfig/network-scripts/ifcfg-eth0 ./<br>sed -i &quot;s/IPADDR=.<em>/IPADDR=\&quot;$ip\&quot;/&quot; ifcfg-eth0<br>virt-copy-in -d $name ./ifcfg-eth0 /etc/sysconfig/network-scripts/<br>rm -rf ./ifcfg-eht0<br>sed -i &quot;s/&lt;graphics.</em>/<graphics type='vnc' port='$port' autoport='no'   
+listen='0.0.0.0'>/&quot; /etc/libvirt/qemu/$name.xml<br>virsh define /etc/libvirt/qemu/$name.xml<br>virsh start $name<br>virsh start base  </p>
+</blockquote>
+</body></html>
