@@ -133,16 +133,10 @@
                                 str = '<div class="card" style="width: 18rem;"><div class="card-body"><button class="btn btn-outline-dark del_his" id="his'+i+'">删除</button><div><b>'+method+'</b> '+url+'</div><div>'+query+'</div></div></div>'
                                 $(".history").append(str);
                             }
-                            /*str = '<div class="card" style="width: 18rem;"><div class="card-body"><button class="btn btn-outline-dark del_his" id="his'+len_history+'">删除</button><div><b>'+$("#method").val()+'</b> '+$("#url").val()+'</div><div>'+query_str+'</div></div></div>';
-                            $(".history").append(str);
-                            len_history++;*/
+                        }else{
+                            $("#result").html("<div>时间："+data['time']+" (毫秒)</div><br />"+"<img src='"+data["msg"]+"'>")
                         }
                     }catch(err){
-                        if(data["type"].split("/")[0]=="image"){
-                            data['msg'] = '<img src="'+$("#url").val()+'">'
-                            $("#result").html("返回类型为图片"+"<br />"+data['msg']);
-                            return 0;
-                        }
                         $("#result").html("返回不是json哦"+"<br />"+data['msg']);
                     }
                 })

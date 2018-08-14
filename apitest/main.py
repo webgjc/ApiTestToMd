@@ -13,6 +13,7 @@ req = requests.Session()
 def apiget():
     query = request.args.to_dict()
     body = request.form.to_dict()
+    sts = 0
     if query['method'] == "get":
         res = req.get(query['url'],params=body,timeout=3)
     elif query['method'] == "post":
@@ -21,7 +22,17 @@ def apiget():
         res = req.put(query['url'],data=body,timeout=3)
     elif query['method'] == "delete":
         res = req.delete(query['url'],data=body,timeout=3)
-    return jsonify({"sts":0,"msg":res.text,"time":res.elapsed.microseconds/1000,"type":res.headers["Content-Type"]})
+
+    res_data = res.text
+
+    if "image" in res.headers["Content-Type"]:
+        with open("static/image/tmp.jpg","wb") as f:
+            f.write(res.content)
+            f.close()
+        sts = 1
+        res_data = "/static/image/tmp.jpg"
+        
+    return jsonify({"sts":sts,"msg":res_data,"time":res.elapsed.microseconds/1000})
 
 @api.route("/translate",methods=["GET"])
 def trans():
