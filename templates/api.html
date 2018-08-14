@@ -138,6 +138,11 @@
                             len_history++;*/
                         }
                     }catch(err){
+                        if(data["type"].split("/")[0]=="image"){
+                            data['msg'] = '<img src="'+$("#url").val()+'">'
+                            $("#result").html("返回类型为图片"+"<br />"+data['msg']);
+                            return 0;
+                        }
                         $("#result").html("返回不是json哦"+"<br />"+data['msg']);
                     }
                 })

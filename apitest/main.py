@@ -21,7 +21,7 @@ def apiget():
         res = req.put(query['url'],data=body,timeout=3)
     elif query['method'] == "delete":
         res = req.delete(query['url'],data=body,timeout=3)
-    return jsonify({"sts":0,"msg":res.text,"time":res.elapsed.microseconds/1000})
+    return jsonify({"sts":0,"msg":res.text,"time":res.elapsed.microseconds/1000,"type":res.headers["Content-Type"]})
 
 @api.route("/translate",methods=["GET"])
 def trans():
