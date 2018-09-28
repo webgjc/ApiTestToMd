@@ -1,0 +1,50 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>在线md文档</title><link rel="stylesheet" href="/static/style.css"><link rel="stylesheet" href="/static/preview.css"><style type="text/css">body{padding-top:2%;padding-left:20%;padding-right:20%;padding-bottom:2%;}</style></head><body><h1 id="docker-">docker从入门到放弃</h1>
+<h2 id="-">查看镜像，查看容器</h2>
+<blockquote>
+<p>docker images -a<br>docker ps -a</p>
+</blockquote>
+<h2 id="-">进入容器命令行</h2>
+<blockquote>
+<p>docker exec -it container_name bash</p>
+</blockquote>
+<blockquote>
+<p>docker run -it images bash</p>
+</blockquote>
+<h2 id="-">查看改动</h2>
+<blockquote>
+<p>docker diff</p>
+</blockquote>
+<h2 id="-">保存容器为新的镜像</h2>
+<blockquote>
+<p>docker commit container_name repository:tag</p>
+</blockquote>
+<h2 id="-">运行镜像</h2>
+<blockquote>
+<p>docker run --name xxx -d -p 80:80 repository:tag</p>
+</blockquote>
+<h2 id="-">构建镜像</h2>
+<blockquote>
+<p>docker build ./ -t repository:tag</p>
+</blockquote>
+<h2 id="-">搜索公共镜像</h2>
+<blockquote>
+<p>docker search search_name</p>
+</blockquote>
+<h2 id="-">删除镜像</h2>
+<blockquote>
+<p>docker rmi `docker images -a |grep ago |awk &#39;{print $3}&#39;`</p>
+</blockquote>
+<h2 id="-">删除容器</h2>
+<blockquote>
+<p>docker rm `docker ps -a |grep ago |awk &#39;{print $1}&#39;`</p>
+</blockquote>
+<h2 id="-">网络</h2>
+<blockquote>
+<p>docker network ls</p>
+</blockquote>
+<h1 id="docker-compose">docker-compose</h1>
+<h2 id="-docker">构建/重启/停止/开启 docker</h2>
+<blockquote>
+<p>docker-compose build/restart/stop/up [service_name]</p>
+</blockquote>
+</body></html>

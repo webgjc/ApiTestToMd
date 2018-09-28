@@ -1,5 +1,5 @@
 #coding:utf-8
-from flask import Blueprint,request,jsonify
+from flask import Blueprint,jsonify,request
 import requests
 import hashlib
 import random
@@ -94,3 +94,14 @@ def load():
 def get_md_list():
     md_list = os.listdir("./md/")
     return jsonify({"sts":0,"msg":md_list})
+
+@api.route("/delete",methods=["GET"])
+def md_delete():
+    filename = request.args.get("md",None)
+    try:
+        os.remove("./md/" + filename + ".md")
+        os.remove("./templates/" + filename + ".html")
+        res = 1
+    except:
+        res = 0
+    return jsonify({"sts":0,"msg":res})
