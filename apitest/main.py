@@ -11,6 +11,7 @@ req = requests.Session()
 
 @api.route("/api",methods=["GET","POST"])
 def apiget():
+    req.cookies.update(request.cookies)
     query = request.args.to_dict()
     body = request.form.to_dict()
     sts = 0

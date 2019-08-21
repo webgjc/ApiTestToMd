@@ -1,0 +1,15 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>在线md文档</title><link rel="stylesheet" href="/static/style.css"><link rel="stylesheet" href="/static/preview.css"><style type="text/css">body{padding-top:2%;padding-left:20%;padding-right:20%;padding-bottom:2%;}</style></head><body><p>数据采集优化 
+版本：1.5</p>
+<p>主要改动为hive采集可使用Metastore，且兼容旧版</p>
+<p>前端页面改动</p>
+<p>新增数据库页：</p>
+<pre><code>1. 增加数据库类型为 METASTORE，提示只支持mysql作为hive的metastore数据库的。
+2. 增加HIVE类型的数据库时会多一个选项框选择 上面的METASTORE数据库，可不选
+</code></pre><p>展示数据库列表页</p>
+<pre><code>1. 数据库类型为METASTORE 同步数据库按钮为disable
+</code></pre><p>后端主要工作</p>
+<pre><code>1. 数据库管理部分接口改动
+2. 后端同步hive时判断是否有填写METASTORE用不同方式同步数据库表信息
+3. 从METASTORE解析出一整个库表字段信息并同步至本地数据库（目前是直接拿整个库信息，看效果优化）
+4. 完成MetaStore的元数据的解析文档
+</code></pre></body></html>
